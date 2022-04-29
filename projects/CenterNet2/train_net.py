@@ -34,7 +34,7 @@ from detectron2.utils.events import (
 from detectron2.modeling.test_time_augmentation import GeneralizedRCNNWithTTA
 from detectron2.data.dataset_mapper import DatasetMapper
 from detectron2.data.build import build_detection_train_loader
-
+from detectron2.data.datasets import register_coco_instances
 from centernet.config import add_centernet_config
 from centernet.data.custom_build_augmentation import build_custom_augmentation
 
@@ -166,14 +166,28 @@ def do_train(cfg, model, resume=False):
             "Total training time: {}".format(
                 str(datetime.timedelta(seconds=int(total_time)))))
 
+NUM_CLASSES=2
+
 def setup(args):
-    """
-    Create configs and perform basic setups.
-    """
+    """ Create configs and perform basic setups. """
+    register_coco_instances("train", {
+    }, "/content/drive/MyDrive/Robosub_CenterNet2_Project/train_split.json",
+                            "/content/drive/MyDrive/Robosub_CenterNet2_Project/images")
+    register_coco_instances("test", {
+    }, "/content/drive/MyDrive/Robosub_CenterNet2_Project/val_split.json",
+                            "/content/drive/MyDrive/Robosub_CenterNet2_Project/images")
+
+
     cfg = get_cfg()
     add_centernet_config(cfg)
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
+    cfg.DATASETS.TRAIN = ("train",)
+    cfg.DATASETS.TEST = ("test",)
+    cfg.MODEL.CENTERNET.NUM_CLASSES = NUM_CLASSES
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = NUM_CLASSES
+
+
     if '/auto' in cfg.OUTPUT_DIR:
         file_name = os.path.basename(args.config_file)[:-5]
         cfg.OUTPUT_DIR = cfg.OUTPUT_DIR.replace('/auto', '/{}'.format(file_name))

@@ -20,10 +20,14 @@ from detectron2.utils.video_visualizer import VideoVisualizer
 from detectron2.utils.visualizer import ColorMode, Visualizer
 from detectron2.data import MetadataCatalog
 
+NUM_CLASSES=2
 def setup_cfg(args):
     # load config from file and command-line arguments
     cfg = get_cfg()
     add_centernet_config(cfg)
+    cfg.MODEL.CENTERNET.NUM_CLASSES = NUM_CLASSES
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = NUM_CLASSES
+
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     # Set score_threshold for builtin models
@@ -35,6 +39,7 @@ def setup_cfg(args):
     cfg.MODEL.PANOPTIC_FPN.COMBINE.INSTANCES_CONFIDENCE_THRESH = args.confidence_threshold
     cfg.freeze()
     return cfg
+
 
 
 def get_parser():
